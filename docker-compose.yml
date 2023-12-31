@@ -1,0 +1,15 @@
+version: '3.7'
+services:  
+  qgmiOracle19:
+    image: ${DOCKER_ORACLE_19_IMAGE:-fabricads/oracle-19c:1.0.0}
+    build:
+      context: .
+    ports:
+      - "${DOCKER_ORACLE_19_PORT:-1521}:1521"
+    restart: ${DOCKER_ORACLE_19_RESTART:-unless-stopped}
+    deploy:
+      restart_policy:
+        condition: ${DOCKER_ORACLE_19_RESTART_POLICY_CONDITION:-on-failure}
+      resources:
+          limits:
+            memory: ${DOCKER_ORACLE_19_MEMORY:-2048m}
