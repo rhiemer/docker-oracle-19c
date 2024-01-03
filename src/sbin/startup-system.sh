@@ -1,5 +1,25 @@
 #!/bin/bash
+set -o errexit
 
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+ do
+   key="$1"
+   case $key in
+      -v|--verbose)
+      VERBOSE="${1}"
+      set -x
+      shift # past argument
+      ;;
+      *)    # unknown option
+      POSITIONAL+=("$1") # save it in an array for later
+      shift # past argument
+      ;;
+  esac
+done
+
+# restore positional parameters
+set -- "${POSITIONAL[@]}"
  
 source "/usr/sbin/sqlplus.sh"
 
@@ -23,16 +43,32 @@ if [ "$RELAX_SECURITY" == "true" ]; then
 	
 fi
 
-echo "Setting SYS password... "
-if ! echo "ALTER USER SYS IDENTIFIED BY \"$ORACLE_PASSWORD\";" | $SQL_PLUS_COMMAND_ADMIN ; then
-	echo "Error setting SYS password."
-	exit 1;
+
+_ORACLE_PASSWORD="${ORACLE_PASSWORD:-$ORACLE_PWD}"
+if [ ! -z "${_ORACLE_PASSWORD// }" ]; then
+	echo "Setting SYS password... "
+	if ! echo "ALTER USER SYS IDENTIFIED BY \"$_ORACLE_PASSWORD\";" | $SQL_PLUS_COMMAND_ADMIN ; then
+		echo "Error setting SYS password."
+		exit 1;
+	fi
 fi
-	
-echo "Setting SYSTEM password... "
-if	! echo "ALTER USER SYSTEM IDENTIFIED BY \"$ORACLE_USER_SYSTEM_PASSWORD\";" | $SQL_PLUS_COMMAND_ADMIN  ; then
-	echo "Error setting SYSTEM password."
-	exit 1;
+
+_ORACLE_USER_SYSTEM_PASSWORD="${ORACLE_USER_SYSTEM_PASSWORD:-$ORACLE_PWD}"
+if [ ! -z "$_ORACLE_USER_SYSTEM_PASSWORD" ] ; then	
+	echo "Setting SYSTEM password... "
+	if	! echo "ALTER USER SYSTEM IDENTIFIED BY \"$ORACLE_USER_SYSTEM_PASSWORD\";" | $SQL_PLUS_COMMAND_ADMIN  ; then
+		echo "Error setting SYSTEM password."
+		exit 1;
+	fi
+fi
+
+_ORACLE_PDBADMIN_PASSWORD="${ORACLE_PDBADMIN_PASSWORD:-$ORACLE_PWD}"
+if [ ! -z "$_ORACLE_PDBADMIN_PASSWORD" ] ; then	
+	echo "Setting PDBADMIN password... "
+	if	! echo "ALTER USER PDBADMIN IDENTIFIED BY \"$_ORACLE_PDBADMIN_PASSWORD\";" | $SQL_PLUS_COMMAND_ADMIN  ; then
+		echo "Error setting PDBADMIN password."
+		exit 1;
+	fi
 fi
 
 if [ "$ALLOW_REMOTE" == "true" ]; then

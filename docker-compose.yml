@@ -12,4 +12,4 @@ services:
         condition: ${DOCKER_ORACLE_19_RESTART_POLICY_CONDITION:-on-failure}
       resources:
           limits:
-            memory: ${DOCKER_ORACLE_19_MEMORY:-2048m}
+            memory: ${DOCKER_ORACLE_19_MEMORY:-4096m}
