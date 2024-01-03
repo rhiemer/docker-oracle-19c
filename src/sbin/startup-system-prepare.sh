@@ -39,12 +39,33 @@ done
 # restore positional parameters
 set -- "${POSITIONAL[@]}"
 
-STARTUP_SYSTEM="${STARTUP_SYSTEM:-true}"
-FORCE_STARTUP_SYSTEM="${FORCE_STARTUP_SYSTEM:-$FORCE_INIT}"
+trapFileResult(){   
+   STATUS="$?"  
+   echo ""
+   cat $FILE_SQL
+   echo ""
+   return $STATUS
+}
 
+
+FORCE_STARTUP_SYSTEM="${FORCE_STARTUP_SYSTEM:-$FORCE_INIT}"
 FILE_PID_START_SYSTEM="${FILE_PID_START_SYSTEM:-$DIR_STARTUP_PIDS/start-system.id}"
 
 if [[ "$FORCE_STARTUP_SYSTEM" == "true" || ! -e "$FILE_PID_START_SYSTEM" ]]; then
+   FILE_SQL=$(mktemp -t)
    mkdir -p $(dirname $FILE_PID_START_SYSTEM)
-   $FOLDER_ORACLE_SCRIPTS/startup-system.sh ${PARAMS[@]} | tee "$FILE_PID_START_SYSTEM"
+   
+   echo "Configurações padrões para os usuários SYS e SYSTEM..."
+   echo ""
+
+   trap 'trapFileResult' EXIT
+   
+   $FOLDER_ORACLE_SCRIPTS/startup-system.sh ${PARAMS[@]} 1> $FILE_SQL  
+   
+   echo ""
+   
+   cat $FILE_SQL > $FILE_PID_START_SYSTEM
+
+   echo "Configurações padrões para os usuários SYS e SYSTEM executados com sucesso."
+
 fi

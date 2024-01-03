@@ -1,6 +1,6 @@
 version: '3.7'
 services:  
-  qgmiOracle19:
+  dockerOracle19c:
     image: ${DOCKER_ORACLE_19_IMAGE:-fabricads/oracle-19c:1.0.0}
     build:
       context: .

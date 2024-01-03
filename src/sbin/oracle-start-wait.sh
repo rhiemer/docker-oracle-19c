@@ -36,6 +36,7 @@ source "$FOLDER_ORACLE_SCRIPTS/sqlplus.sh"
 FILE_RESULT_TMP_WAIT=$(mktemp -t)
 FILE_SQL_TMP=$(mktemp -t)
 
+RESULT_SUCESS_COMMAND_START_WAIT="ConnectionSucess"
 cat > $FILE_SQL_TMP <<EOF
    SELECT 'ConnectionSucess' as result FROM DUAL
 EOF
@@ -44,9 +45,7 @@ waitOracle(){
     endtime=$(date -ud "$ORACLE_CONNECT_WAIT_TIME_OUT" +%s)
     while [[ $(date -u +%s) -le $endtime ]]
     do  
-        echo ""
-        $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --connect $SQL_PLUS_CREDENCIAIS_PWD --file-sql $FILE_SQL_TMP --file-result $FILE_RESULT_TMP_WAIT
-        echo ""
+        $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --connect $SQL_PLUS_CREDENCIAIS_PWD --file-sql $FILE_SQL_TMP --file-result $FILE_RESULT_TMP_WAIT 1>/dev/null
         if [ ! -z "${VERBOSE// }" ]; then
           echo "Resultado wait"
           cat $FILE_RESULT_TMP_WAIT
@@ -60,8 +59,8 @@ waitOracle(){
     return 1
 }
 
-ORACLE_CONNECT_WAIT_TIME_OUT="${ORACLE_CONNECT_WAIT_TIME_OUT:-30 minute}"
-ORACLE_CONNECT_SLEEP_TIME_OUT="${ORACLE_CONNECT_SLEEP_TIME_OUT:-300}"
+ORACLE_CONNECT_WAIT_TIME_OUT="${ORACLE_CONNECT_WAIT_TIME_OUT:-15 minute}"
+ORACLE_CONNECT_SLEEP_TIME_OUT="${ORACLE_CONNECT_SLEEP_TIME_OUT:-3}"
 ORACLE_CONNECT_SLEEP_COMMAND="${ORACLE_CONNECT_SLEEP_COMMAND:-5}"
 
 waitOracle

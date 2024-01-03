@@ -32,5 +32,5 @@ set -- "${POSITIONAL[@]}"
 STARTUP_SYSTEM="${STARTUP_SYSTEM:-true}"
 
 if [[ "$STARTUP_SYSTEM" == "true" ]]; then
-  $FOLDER_ORACLE_SCRIPTS/startup-system-prepare.sh -v ${PARAMS[@]}
+  $FOLDER_ORACLE_SCRIPTS/startup-system-prepare.sh ${PARAMS[@]}
 fi
