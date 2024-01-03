@@ -1,2 +1,4 @@
 .DS_Store
 volumes/*
+teste-rsync/
+volumes/

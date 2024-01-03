@@ -25,8 +25,8 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
-      --file-result)
-      FILE_RESULT="${2}"
+      --replace-vars)
+      REPLACE_VARS_SQL_COMMAND="${2}"
       shift # past argument
       shift # past argument
       ;;
@@ -50,14 +50,13 @@ done
 # restore positional parameters
 set -- "${POSITIONAL[@]}"
 
+REPLACE_VARS_SQL_COMMAND="${REPLACE_VARS_SQL_COMMAND:-true}"
 BUFFER_TIMEOUT="${BUFFER_TIMEOUT:-1}"  
 if [[ ! -z "${BUFFER_TIMEOUT// }" ]]; then
   _BUFFER_TIMEOUT=("-t" "$BUFFER_TIMEOUT")
 fi
 
 FILE_TMP_BUFFER="$( mktemp )"
-FILE_RESULT_TMP=$(mktemp -t)
-_FILE_RESULT="${FILE_RESULT:-$FILE_RESULT_TMP}"
 
 
 msgFileBuffer(){
@@ -79,46 +78,47 @@ fi
 
 trapRemoveFileResult(){   
   STATUS="$?"  
-  if [ $STATUS -ne 0 ] ; then
-    echo "Erro ao executar o script. $STATUS" 1>&2
-    cat $_FILE_RESULT 1>&2    
-  elif [ -z "${FILE_RESULT// }" ]; then
-    cat $_FILE_RESULT
-  fi
   rm -rf $FILE_TMP_BUFFER || true
   if [  -z "${VERBOSE// }" ]; then
-    rm -rf $FILE_RESULT_TMP || true
-  else
-    echo "" >> $FILE_RESULT_TMP
-    if [ ! -z "${FILE_SQL// }" ]; then
-     touch $FILE_SQL
-     cat $FILE_SQL >> $FILE_RESULT_TMP
-    else
-     echo ${POSITIONAL[@]} >> $FILE_RESULT_TMP
-    fi 
+    rm -rf $FILE_EXEC || true
+    rm -rf $FILE_EXEC2 || true
   fi  
   return $STATUS
 }
+
+
+
+FILE_EXEC=$(mktemp -t)
+FILE_EXEC2=$(mktemp -t)
+
+if [[ ! -z "${FILE_SQL// }" ]]; then
+   cp -rf "$FILE_SQL" "$FILE_EXEC"
+else
+   echo ${POSITIONAL[@]} > "$FILE_EXEC"
+fi 
+
+find "$FILE_EXEC" -type f  -exec sh -c 'tr -d "\r" < "{}" > "{}".new && mv "{}".new "{}"' -- {} \; -exec chmod +x {} \;  
+if [[ "$REPLACE_VARS_SQL_COMMAND" == "true" ]]; then
+  envsubst "`printf '${%s} ' $(sh -c "env|cut -d'=' -f1")`" < "$FILE_EXEC" > "$FILE_EXEC2"  
+else 
+  cat $FILE_EXEC > $FILE_EXEC2
+fi
 
 trap 'trapRemoveFileResult' EXIT
 
 sqlplus -s /nolog << EOF
 
-      CONNECT $ORACLE_CONNECT;
       
       WHENEVER OSERROR EXIT 68;
       whenever sqlerror exit sql.sqlcode;
       
       set termout off;
       set sqlblanklines on;
-      
-      spool $_FILE_RESULT;
 
-      $( [[ ! -z "${FILE_SQL// }" ]] && tr '\n' ' ' < $FILE_SQL || echo ${POSITIONAL[@]} );
+      CONNECT $ORACLE_CONNECT;
       
-      spool OFF;
-
+      @$FILE_EXEC2;
+      
       exit;
 
 EOF
-

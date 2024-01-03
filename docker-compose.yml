@@ -6,6 +6,9 @@ services:
       context: .
     ports:
       - "${DOCKER_ORACLE_19_PORT:-1521}:1521"
+    volumes:
+      - "${DOCKER_ORACLE_19_VOLUME_INIT_SQL:-./volumes/config/init}:/volumes/init/sql:ro"
+      - "${DOCKER_ORACLE_19_VOLUME_INIT_EXEC:-./volumes/config/exec}:/volumes/init/exec:rw"
     restart: ${DOCKER_ORACLE_19_RESTART:-unless-stopped}
     deploy:
       restart_policy:

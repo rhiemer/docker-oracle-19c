@@ -18,6 +18,11 @@ while [[ $# -gt 0 ]]
       STARTUP_SYSTEM="${2}"
       shift # past argument
       shift # past argument
+      ;;
+      --startup-sql-init)
+      STARTUP_SQL_INIT="${2}"
+      shift # past argument
+      shift # past argument
       ;; 
       *)    # unknown option
       POSITIONAL+=("$1") # save it in an array for later
@@ -30,7 +35,13 @@ done
 set -- "${POSITIONAL[@]}"
 
 STARTUP_SYSTEM="${STARTUP_SYSTEM:-true}"
+STARTUP_SQL_INIT="${STARTUP_SQL_INIT:-true}"
+
 
 if [[ "$STARTUP_SYSTEM" == "true" ]]; then
   $FOLDER_ORACLE_SCRIPTS/startup-system-prepare.sh ${PARAMS[@]}
+fi
+
+if [[ "$STARTUP_SQL_INIT" == "true" ]]; then
+  $FOLDER_ORACLE_SCRIPTS/run-commands-prepare.sh -v ${PARAMS[@]}
 fi

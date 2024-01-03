@@ -37,15 +37,12 @@ FILE_RESULT_TMP_WAIT=$(mktemp -t)
 FILE_SQL_TMP=$(mktemp -t)
 
 RESULT_SUCESS_COMMAND_START_WAIT="ConnectionSucess"
-cat > $FILE_SQL_TMP <<EOF
-   SELECT 'ConnectionSucess' as result FROM DUAL
-EOF
 
 waitOracle(){    
     endtime=$(date -ud "$ORACLE_CONNECT_WAIT_TIME_OUT" +%s)
     while [[ $(date -u +%s) -le $endtime ]]
     do  
-        $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --connect $SQL_PLUS_CREDENCIAIS_PWD --file-sql $FILE_SQL_TMP --file-result $FILE_RESULT_TMP_WAIT 1>/dev/null
+        echo "SELECT '$RESULT_SUCESS_COMMAND_START_WAIT' as result FROM DUAL" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $SQL_PLUS_CREDENCIAIS_PWD > $FILE_RESULT_TMP_WAIT || true
         if [ ! -z "${VERBOSE// }" ]; then
           echo "Resultado wait"
           cat $FILE_RESULT_TMP_WAIT

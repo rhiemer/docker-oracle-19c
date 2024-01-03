@@ -53,18 +53,20 @@ FILE_PID_START_SYSTEM="${FILE_PID_START_SYSTEM:-$DIR_STARTUP_PIDS/start-system.i
 
 if [[ "$FORCE_STARTUP_SYSTEM" == "true" || ! -e "$FILE_PID_START_SYSTEM" ]]; then
    FILE_SQL=$(mktemp -t)
-   mkdir -p $(dirname $FILE_PID_START_SYSTEM)
    
    echo "Configurações padrões para os usuários SYS e SYSTEM..."
    echo ""
 
    trap 'trapFileResult' EXIT
    
-   $FOLDER_ORACLE_SCRIPTS/startup-system.sh ${PARAMS[@]} 1> $FILE_SQL  
+   $FOLDER_ORACLE_SCRIPTS/startup-system.sh ${PARAMS[@]} | tee $FILE_SQL
    
    echo ""
    
-   cat $FILE_SQL > $FILE_PID_START_SYSTEM
+   mkdir -p $(dirname $FILE_PID_START_SYSTEM)
+   
+   echo "" >> $FILE_PID_START_SYSTEM
+   cat $FILE_SQL >> $FILE_PID_START_SYSTEM
 
    echo "Configurações padrões para os usuários SYS e SYSTEM executados com sucesso."
 
