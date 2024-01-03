@@ -97,11 +97,16 @@ if [[ -z "${FOLDER_SCRIPTS_EXEC// }" || ${FORCE_RUN_SQL_SYNC} == "true"  ]]; the
   _FILES_EXEC=( $( find "$FOLDER_SCRIPTS" -mindepth 1 -type f | sort ))
 else
   _FILES_EXEC=( $( rsync -a --dry-run --out-format="%f" "${FOLDER_SCRIPTS}/" "${FOLDER_SCRIPTS_EXEC}/" ))
+  _RSYNC=true
 fi
 
 for _FILE_EXEC in ${_FILES_EXEC[@]} 
 do           
   
+  if [ "${_RSYNC}" == "true"  ]; then
+    _FILE_EXEC="/${_FILE_EXEC}"  
+  fi
+
   if [ -d "${_FILE_EXEC}" ]; then
     continue;
   fi

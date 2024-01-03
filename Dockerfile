@@ -11,6 +11,7 @@ RUN yum -y install rsync && \
     rm -rf /var/cache/yum/*
 
 RUN mkdir -p /volumes && chmod -R 777 /volumes
+RUN mkdir -p /init && chmod -R 777 /init 
 
 USER oracle        
 
@@ -34,9 +35,10 @@ ENV NLS_LANG "BRAZILIAN PORTUGUESE_BRAZIL.UTF8"
 
 
 ENV FOLDER_INIT_DB "/volumes/init/sql" 
-ENV DIR_STARTUP_PIDS "/volumes/init/exec/pids"
-ENV DIR_STARTUP_SQL "/volumes/init/exec/sqls"
-ENV DIR_STARTUP_SQL_LOGS "/volumes/init/exec/logs/sql"
+ENV DIR_STARTUP_SQL_LOGS "/volumes/init/logs/sql"
+
+ENV DIR_STARTUP_PIDS "/init/exec/pids"
+ENV DIR_STARTUP_SQL "/init/exec/sqls"
 
 ENV SQL_PLUS_CREDENTIALS_FILE "sql-plus-credentials"
 

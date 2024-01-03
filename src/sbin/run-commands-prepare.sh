@@ -33,4 +33,5 @@ fi
 
 echo "Executando comandos e sqls iniciais..."
 mkdir -p "$DIR_STARTUP_SQL"
+mkdir -p "$(dirname $FILE_STARTUP_SQL_LOG)"
 $FOLDER_ORACLE_SCRIPTS/run-commands.sh --folder-scripts "$FOLDER_INIT_DB" --folder-scripts-exec "$DIR_STARTUP_SQL" --force "$FORCE_RUN_SQL_INIT" ${PARAMS[@]} | tee -a $FILE_STARTUP_SQL_LOG 
