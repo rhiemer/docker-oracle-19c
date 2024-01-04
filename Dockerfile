@@ -34,11 +34,11 @@ ENV ORACLE_USER_SYSTEM_PASSWORD "oracle"
 ENV NLS_LANG "BRAZILIAN PORTUGUESE_BRAZIL.UTF8"
 
 
-ENV FOLDER_INIT_DB "/volumes/init/sql" 
-ENV DIR_STARTUP_SQL_LOGS "/volumes/init/logs/sql"
+ENV FOLDER_INIT_DB "/volumes/init/sql"
 
 ENV DIR_STARTUP_PIDS "/init/exec/pids"
 ENV DIR_STARTUP_SQL "/init/exec/sqls"
+ENV DIR_STARTUP_SQL_LOGS "/init/logs/sql"
 
 ENV SQL_PLUS_CREDENTIALS_FILE "sql-plus-credentials"
 

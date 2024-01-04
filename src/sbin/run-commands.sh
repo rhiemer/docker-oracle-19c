@@ -63,7 +63,7 @@ execSql(){
 
   _LOG="SQL - $( basename $_file_sql) Usuario:$_USER_EXEC"
   log "Executando $_LOG"
-  $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --file-sql "$_file_sql"
+  $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --connect "$_SQL_PLUS_CREDENTIALS" --file-sql "$_file_sql"
   log "Executado com sucesso $_LOG"
   echo ""
 
@@ -126,7 +126,7 @@ do
   esac
 
   if [  ! -z "${FOLDER_SCRIPTS_EXEC// }" ]; then
-    _FILES_TARGET="${_FILE_EXEC\$FOLDER_SCRIPTS\$FOLDER_SCRIPTS_EXEC}"
+    _FILES_TARGET="${_FILE_EXEC/${FOLDER_SCRIPTS}/${FOLDER_SCRIPTS_EXEC}}"
     mkdir -p "$(dirname $_FILES_TARGET)"
     cp -rf "$_FILE_EXEC" "$_FILES_TARGET"
   fi  
