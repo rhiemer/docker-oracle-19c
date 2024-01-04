@@ -134,7 +134,7 @@ do
 done  
 
 if [  ! -z "${FOLDER_SCRIPTS_EXEC// }" ]; then
-   rsync --delete "${FOLDER_SCRIPTS}/" "${FOLDER_SCRIPTS_EXEC}/"  
+   rsync --delete -r "${FOLDER_SCRIPTS}/" "${FOLDER_SCRIPTS_EXEC}/"
 fi 
 
 

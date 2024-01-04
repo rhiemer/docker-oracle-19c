@@ -12,12 +12,27 @@ while [[ $# -gt 0 ]]
       shift # past argument
       ;;
       --timeout)
-      ORACLE_CONNECT_WAIT_TIME_OUT="${2}"
+      WAIT_TIME_OUT="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --wait-file)
+      WAIT_FILE="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --wait-grep)
+      WAIT_GREP="${2}"
       shift # past argument
       shift # past argument
       ;;
       --sleep)
-      ORACLE_CONNECT_SLEEP_TIME_OUT="${2}"
+      SLEEP_LOOP="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --sleep-command)
+      SLEEP_COMMAND="${2}"
       shift # past argument
       shift # past argument
       ;;
@@ -36,35 +51,39 @@ source "$FOLDER_ORACLE_SCRIPTS/sqlplus.sh"
 FILE_RESULT_TMP_WAIT=$(mktemp -t)
 FILE_SQL_TMP=$(mktemp -t)
 
-RESULT_SUCESS_COMMAND_START_WAIT="ConnectionSucess"
+WAIT_GREP="${WAIT_GREP:-100%}"
 
 waitOracle(){    
-    endtime=$(date -ud "$ORACLE_CONNECT_WAIT_TIME_OUT" +%s)
+    endtime=$(date -ud "$WAIT_TIME_OUT" +%s)
     while [[ $(date -u +%s) -le $endtime ]]
     do  
-        echo "SELECT '$RESULT_SUCESS_COMMAND_START_WAIT' as result FROM DUAL" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $SQL_PLUS_CREDENCIAIS_PWD > $FILE_RESULT_TMP_WAIT || true
-        if [ ! -z "${VERBOSE// }" ]; then
-          echo "Resultado wait"
-          cat $FILE_RESULT_TMP_WAIT
-          echo ""
-          echo ""
-        fi         
+        if [ ! -z "${WAIT_FILE// }" ]; then        
+          FILE_RESULT_TMP_WAIT="$WAIT_FILE"
+          RESULT_SUCESS_COMMAND_START_WAIT="$WAIT_GREP"
+        else
+          RESULT_SUCESS_COMMAND_START_WAIT="ConnectionSucess"
+          echo "SELECT '$RESULT_SUCESS_COMMAND_START_WAIT' as result FROM DUAL" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $SQL_PLUS_CREDENCIAIS_PWD > $FILE_RESULT_TMP_WAIT || true
+          if [ ! -z "${VERBOSE// }" ]; then
+            echo "Resultado wait"
+            cat $FILE_RESULT_TMP_WAIT
+            echo ""
+            echo ""
+          fi         
+        fi
         cat $FILE_RESULT_TMP_WAIT | grep "$RESULT_SUCESS_COMMAND_START_WAIT" && return 0 || true;
-        sleep $ORACLE_CONNECT_SLEEP_TIME_OUT;
+        sleep $SLEEP_LOOP;
     done
-    echo "Oracle não se conectou. TIMEOUT - $ORACLE_CONNECT_WAIT_TIME_OUT." 1>&2
+    echo "Oracle não se conectou. TIMEOUT - $WAIT_TIME_OUT." 1>&2
     return 1
 }
 
-ORACLE_CONNECT_WAIT_TIME_OUT="${ORACLE_CONNECT_WAIT_TIME_OUT:-15 minute}"
-ORACLE_CONNECT_SLEEP_TIME_OUT="${ORACLE_CONNECT_SLEEP_TIME_OUT:-3}"
-ORACLE_CONNECT_SLEEP_COMMAND="${ORACLE_CONNECT_SLEEP_COMMAND:-5}"
+WAIT_TIME_OUT="${WAIT_TIME_OUT:-15 minute}"
+SLEEP_LOOP="${SLEEP_LOOP:-1}"
+SLEEP_COMMAND="${SLEEP_COMMAND:-1}"
 
 waitOracle
 
-sleep $ORACLE_CONNECT_SLEEP_COMMAND
-
-echo "Oracle conectado, executando comandos de inicialização..."
+sleep $SLEEP_COMMAND
 
 if [ ! -z "${VERBOSE// }" ]; then
   echo "Executando ${POSITIONAL[@]}"

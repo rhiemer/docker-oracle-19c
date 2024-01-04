@@ -112,9 +112,9 @@ sqlplus -s /nolog << EOF
       WHENEVER OSERROR EXIT 68;
       whenever sqlerror exit sql.sqlcode;
       
-      set termout off;
       set sqlblanklines on;
-
+      set termout on;
+      
       CONNECT $ORACLE_CONNECT;
       
       @$FILE_EXEC2;

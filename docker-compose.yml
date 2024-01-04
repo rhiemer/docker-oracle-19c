@@ -8,7 +8,6 @@ services:
       - "${DOCKER_ORACLE_19_PORT:-1521}:1521"
     volumes:
       - "${DOCKER_ORACLE_19_VOLUME_INIT_SQL:-./volumes/config/init/sql}:/volumes/init/sql:ro"
-      - "${DOCKER_ORACLE_19_VOLUME_INIT_LOGS:-./volumes/config/init/logs}:/volumes/init/logs:rw"
     restart: ${DOCKER_ORACLE_19_RESTART:-unless-stopped}
     deploy:
       restart_policy:
