@@ -12,6 +12,7 @@ RUN yum -y install rsync && \
 
 RUN mkdir -p /volumes && chmod -R 777 /volumes
 RUN mkdir -p /init && chmod -R 777 /init 
+RUN mkdir -p /data-pump && chmod -R 777 /data-pump 
 
 USER oracle        
 
