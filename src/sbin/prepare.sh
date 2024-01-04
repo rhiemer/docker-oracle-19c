@@ -34,13 +34,11 @@ done
 # restore positional parameters
 set -- "${POSITIONAL[@]}"
 
-set -x 
-
 trapErrorFinish(){   
   STATUS="$?"  
-  #if [ $STATUS -ne 0 ]; then
+  if [ "${STATUS// }" != "0" ]; then
     echo "Erro ao executar as customizações iniciais." 1>&2
-  #fi
+  fi
   return $STATUS
 }
 
@@ -55,7 +53,7 @@ STARTUP_SQL_INIT="${STARTUP_SQL_INIT:-true}"
 
 trap 'trapErrorFinish' EXIT
 
-echo "Oracle conectado, executando customizações..."
+echo "Oracle incializado, executando customizações..."
 
 if [[ "$STARTUP_SYSTEM" == "true" ]]; then
   $FOLDER_ORACLE_SCRIPTS/startup-system-prepare.sh ${PARAMS[@]}
