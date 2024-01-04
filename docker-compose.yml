@@ -13,5 +13,9 @@ services:
       restart_policy:
         condition: ${DOCKER_ORACLE_19_RESTART_POLICY_CONDITION:-on-failure}
       resources:
+          request:          
+            memory: ${DOCKER_ORACLE_19_MEMORY_REQUEST:-2096m}
+            cpu: ${DOCKER_ORACLE_19_CPU_REQUEST:-1}
           limits:
-            memory: ${DOCKER_ORACLE_19_MEMORY:-4096m}
+            memory: ${DOCKER_ORACLE_19_MEMORY_LIMIT:-4096m}
+            cpu: ${DOCKER_ORACLE_19_CPU_LIMIT:-2}

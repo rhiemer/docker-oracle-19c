@@ -16,6 +16,11 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
+      --timeout-unit)
+      WAIT_TIME_OUT_UNIT="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
       --wait-file)
       WAIT_FILE="${2}"
       shift # past argument
@@ -36,6 +41,11 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
+      --oracle-credentials)
+      ORACLE_CREDENTIALS="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
       *)    # unknown option
       POSITIONAL+=("$1") # save it in an array for later
       shift # past argument
@@ -52,9 +62,16 @@ FILE_RESULT_TMP_WAIT=$(mktemp -t)
 FILE_SQL_TMP=$(mktemp -t)
 
 WAIT_GREP="${WAIT_GREP:-100%}"
+WAIT_TIME_OUT="${WAIT_TIME_OUT:-5}"
+WAIT_TIME_OUT_UNIT="${WAIT_TIME_OUT_UNIT:-minute}"
+SLEEP_LOOP="${SLEEP_LOOP:-1}"
+SLEEP_COMMAND="${SLEEP_COMMAND:-1}"
+ORACLE_CREDENTIALS="${ORACLE_CREDENTIALS:-$SQL_PLUS_CREDENCIAIS_ADMIN}"
+
+_WAIT_TIMEOUT="$WAIT_TIME_OUT $WAIT_TIME_OUT_UNIT"
 
 waitOracle(){    
-    endtime=$(date -ud "$WAIT_TIME_OUT" +%s)
+    endtime=$(date -ud "$_WAIT_TIMEOUT" +%s)
     while [[ $(date -u +%s) -le $endtime ]]
     do  
         if [ ! -z "${WAIT_FILE// }" ]; then        
@@ -62,7 +79,7 @@ waitOracle(){
           RESULT_SUCESS_COMMAND_START_WAIT="$WAIT_GREP"
         else
           RESULT_SUCESS_COMMAND_START_WAIT="ConnectionSucess"
-          echo "SELECT '$RESULT_SUCESS_COMMAND_START_WAIT' as result FROM DUAL" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $SQL_PLUS_CREDENCIAIS_PWD > $FILE_RESULT_TMP_WAIT || true
+          echo "SELECT '$RESULT_SUCESS_COMMAND_START_WAIT' as result FROM DUAL" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $ORACLE_CREDENTIALS > $FILE_RESULT_TMP_WAIT || true
           if [ ! -z "${VERBOSE// }" ]; then
             echo "Resultado wait"
             cat $FILE_RESULT_TMP_WAIT
@@ -76,10 +93,6 @@ waitOracle(){
     echo "Oracle não se conectou. TIMEOUT - $WAIT_TIME_OUT." 1>&2
     return 1
 }
-
-WAIT_TIME_OUT="${WAIT_TIME_OUT:-15 minute}"
-SLEEP_LOOP="${SLEEP_LOOP:-1}"
-SLEEP_COMMAND="${SLEEP_COMMAND:-1}"
 
 waitOracle
 
