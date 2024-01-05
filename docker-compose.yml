@@ -1,7 +1,7 @@
 version: '3.9'
 services:  
   dockerOracle19c:
-    image: ${DOCKER_ORACLE_19_IMAGE:-fabricads/oracle-19c:1.0.0}
+    image: ${DOCKER_ORACLE_19_IMAGE:-rhiemer/oracle-19c:1.0.0}
     build:
       context: .
     ports:
