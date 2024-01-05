@@ -49,17 +49,22 @@ log() {
 }
 
 
+sqlCredentials(){
+  _file_credential="${1}"
+
+  _SQL_PLUS_CREDENTIALS="$SQL_PLUS_CREDENCIAIS_ADMIN"
+  SQL_PLUS_CREDENTIALS="$(dirname $_file_credential)/$SQL_PLUS_CREDENTIALS_FILE"
+  if [ -f "$SQL_PLUS_CREDENTIALS" ] ; then     
+    _SQL_PLUS_CREDENTIALS="$(envsubst  < $SQL_PLUS_CREDENTIALS)"
+  fi 
+  _USER_EXEC="$( echo $_SQL_PLUS_CREDENTIALS |  awk -F '/' '{print $1}' )"
+}
+
 execSql(){
 
   _file_sql="${1}"
 
-  _SQL_PLUS_CREDENTIALS="$SQL_PLUS_CREDENCIAIS_ADMIN"
-  SQL_PLUS_CREDENTIALS="$(dirname $_file_sql)/$SQL_PLUS_CREDENTIALS_FILE"
-  if [ -f "$SQL_PLUS_CREDENTIALS" ] ; then     
-    _SQL_PLUS_CREDENTIALS="$(envsubst  < $SQL_PLUS_CREDENTIALS)"
-  fi 
-
-  _USER_EXEC="$( echo $_SQL_PLUS_CREDENTIALS |  awk -F '/' '{print $1}' )"
+  sqlCredentials "$_file_sql"
 
   _LOG="SQL - $( basename $_file_sql) Usuario:$_USER_EXEC"
   log "Executando $_LOG"
@@ -93,6 +98,19 @@ execScripts(){
 }
 
 
+execDump(){
+  _file_dump="${1}"
+  
+  sqlCredentials "$_file_dump"
+
+  _LOG="Dump $( basename $_file_dump)"
+  log "Executando $_LOG"
+  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --oracle-credentials "$_SQL_PLUS_CREDENTIALS" --file "$_file_dump" --create-directory-imp "true" --create-schema-file "true" -v
+  log "Executado com sucesso $_LOG"  
+  echo ""
+}
+
+
 if [[ -z "${FOLDER_SCRIPTS_EXEC// }" || ${FORCE_RUN_SQL_SYNC} == "true"  ]]; then
   _FILES_EXEC=( $( find "$FOLDER_SCRIPTS" -mindepth 1 -type f | sort ))
 else
@@ -112,6 +130,9 @@ do
       ;;
       *.exec.sh)
       execScripts "$_FILE_EXEC"
+      ;;
+      *.dmp)
+      execDump "$_FILE_EXEC"
       ;;
       *sql-plus-credentials*|*.sh)
       ;;

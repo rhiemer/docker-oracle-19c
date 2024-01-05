@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 services:  
   dockerOracle19c:
     image: ${DOCKER_ORACLE_19_IMAGE:-fabricads/oracle-19c:1.0.0}
@@ -13,9 +13,9 @@ services:
       restart_policy:
         condition: ${DOCKER_ORACLE_19_RESTART_POLICY_CONDITION:-on-failure}
       resources:
-          request:          
-            memory: ${DOCKER_ORACLE_19_MEMORY_REQUEST:-2096m}
-            cpu: ${DOCKER_ORACLE_19_CPU_REQUEST:-1}
+          reservations:       
+            memory: "${DOCKER_ORACLE_19_MEMORY_REQUEST:-2096m}"
+            cpus: "${DOCKER_ORACLE_19_CPU_REQUEST:-1.0}"
           limits:
-            memory: ${DOCKER_ORACLE_19_MEMORY_LIMIT:-4096m}
-            cpu: ${DOCKER_ORACLE_19_CPU_LIMIT:-2}
+            memory: "${DOCKER_ORACLE_19_MEMORY_LIMIT:-4096m}"
+            cpus: "${DOCKER_ORACLE_19_CPU_LIMIT:-2.0}"

@@ -22,6 +22,7 @@ RUN find /usr/sbin -type f  \
       -exec chmod +x {} \;
 
 ENV TZ "America/Sao_Paulo"
+ENV BASH_ENV "/home/oracle/.bashrc"
 
 ENV FOLDER_ORACLE_SCRIPTS "/usr/sbin"
 
@@ -50,7 +51,8 @@ ENV ALLOW_REMOTE "true"
 ENV STARTUP_SQL_INIT "true"
 
 ENV FORCE_INIT "false"
-#ENV FORCE_STARTUP_SYSTEM
-#ENV FORCE_RUN_SQL_INIT
+
+ENV ORACLE_DATA_PUMP_RESTORE_CREATE_LOG_FILE "true"
+ENV ORACLE_DATA_PUMP_RESTORE_LOG_DIRECTORY "/home/oracle/logs/imp"
 
 ENTRYPOINT ["/usr/sbin/entrypoint.sh"]

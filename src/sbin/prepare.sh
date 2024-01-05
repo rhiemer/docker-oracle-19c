@@ -42,11 +42,21 @@ trapErrorFinish(){
   return $STATUS
 }
 
+
+setEnv(){
+  KEY="$1"
+  VALUE="$2"   
+  export "$KEY=\"$VALUE\""
+  if [  ! -z "${BASH_ENV// }" ]; then  
+    echo "export $KEY=\"$VALUE\"" >> "$BASH_ENV"
+  fi
+}
+
 source "$FOLDER_ORACLE_SCRIPTS/sqlplus.sh"
 
-export ORA_FOLDER_TABLE_SPACES="${ORA_FOLDER_TABLE_SPACES:-/opt/oracle/oradata/$ORACLE_SID}"
-export ORA_WAIT_LOG_INIT="${ORA_WAIT_LOG_INIT:-/opt/oracle/cfgtoollogs/dbca/${ORACLE_SID}/${ORACLE_SID}.log}"
-export ORA_SQL_CREDENTIALS_ROOT="$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA"
+setEnv "ORA_FOLDER_TABLE_SPACES" "${ORA_FOLDER_TABLE_SPACES:-/opt/oracle/oradata/$ORACLE_SID}"
+setEnv "ORA_WAIT_LOG_INIT" "${ORA_WAIT_LOG_INIT:-/opt/oracle/cfgtoollogs/dbca/${ORACLE_SID}/${ORACLE_SID}.log}"
+setEnv "ORA_SQL_CREDENTIALS_ROOT" "${ORA_SQL_CREDENTIALS_ROOT:-$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA}"
 
 STARTUP_SYSTEM="${STARTUP_SYSTEM:-true}"
 STARTUP_SQL_INIT="${STARTUP_SQL_INIT:-true}"
