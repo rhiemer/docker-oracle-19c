@@ -4,5 +4,5 @@ Extensão da imagem do Oracle 19c.
 ## build
 
 ```bash
-docker build -t fabricads/oracle-19c:1.0.0 .
+docker build -t rhiemer/oracle-19c:1.0.0 .
 ```
