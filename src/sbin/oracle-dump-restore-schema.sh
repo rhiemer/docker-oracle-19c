@@ -97,9 +97,9 @@ createDirectoryOracleAuth(){
   _DIRECTORY=`${PYTHON_CMD[@]} -c "import uuid;print(uuid.uuid1())"`
   _DIRECTORY="${_DIRECTORY%%-*}"
   _DIRECTORY="${_DIRECTORY^^}"
-  _DIRECTORY="${P_PREFIX}_${DIRECTORY}"
+  _DIRECTORY="${P_PREFIX}_${_DIRECTORY}"
 
-  createDirectoryOracle "$_DIRECTORY" "$P_USER" "$P_PREFIX"  
+  createDirectoryOracle "$_DIRECTORY" "$P_DIRECTORY_PATH" "$P_USER"
 }
 
 
