@@ -46,7 +46,7 @@ done
 # restore positional parameters
 set -- "${POSITIONAL[@]}"
 
-for FILE_PERMISSIONS in ${FILES_PERMISSIONS[@]} 
+for FILE_PERMISSIONS in ${FILES_PERMISSIONS[@]}
 do
   for ACTION in ${ACTIONS[@]} 
     awk "{print \"$ACTION ${ACTIONS_COMP[@]}\" \$0 \" TO $TO\"}" $FILE_PERMISSIONS 
