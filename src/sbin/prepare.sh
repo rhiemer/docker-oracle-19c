@@ -75,8 +75,11 @@ if [[ "$STARTUP_SQL_INIT" == "true" ]]; then
 fi
 
 if [[ "$CREATE_USERS_ENVS" == "true" ]]; then
-  $FOLDER_ORACLE_SCRIPTS/oracle-create-user-envs.sh -v ${PARAMS[@]}
+  echo "Cirando usuários envs..."
+  echo ""
+  $FOLDER_ORACLE_SCRIPTS/oracle-create-user-envs.sh ${PARAMS[@]}
 fi
 
 
+echo ""
 echo "Customizações executadas com sucesso."

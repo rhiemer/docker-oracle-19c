@@ -103,8 +103,10 @@ createRoleFactory(){
   P_NAME_ROLE="${1}"
   if [ "${P_NAME_ROLE// }" == "$ORACLE_ROLE_USER_DBA_NAME" ]; then  
     createRoleUserDba "$P_NAME_ROLE" || echo "Não foi possível criar a role $P_NAME_ROLE"
+    enableUserXAOracle "$P_NAME_ROLE"
   elif [ "${P_NAME_ROLE// }" == "$ORACLE_ROLE_USER_APP_NAME" ]; then  
     createRoleUserApp "$P_NAME_ROLE" || echo "Não foi possível criar a role $P_NAME_ROLE"  
+    enableUserXAOracle "$P_NAME_ROLE"
   else
     echo "Role não criada $P_NAME_ROLE"  
   fi

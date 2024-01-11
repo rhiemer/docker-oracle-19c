@@ -84,7 +84,7 @@ createAndSetRoleUser(){
 setUserXa(){
   ENABLED_XA_KEY="${PREFIX_KEY}_ENABLE_XA"
   _ENABLED_XA="${!ENABLED_XA_KEY:-$ORACLE_ENABLE_XA_DEFAULT}"
-  _ENABLED_XA="${_ENABLED_XA:true}"
+  _ENABLED_XA="${_ENABLED_XA:false}"
   if [[ "$_ENABLED_XA" == "true" ]]; then
     enableUserXAOracle "$_USER_SCHEMA_NAME"
   fi
