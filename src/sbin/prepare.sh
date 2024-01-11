@@ -60,6 +60,7 @@ setEnv "ORA_SQL_CREDENTIALS_ROOT" "${ORA_SQL_CREDENTIALS_ROOT:-$SQL_PLUS_COMMAND
 
 STARTUP_SYSTEM="${STARTUP_SYSTEM:-true}"
 STARTUP_SQL_INIT="${STARTUP_SQL_INIT:-true}"
+CREATE_USERS_ENVS="${CREATE_USERS_ENVS:-true}"
 
 trap 'trapErrorFinish' EXIT
 
@@ -72,5 +73,10 @@ fi
 if [[ "$STARTUP_SQL_INIT" == "true" ]]; then
   $FOLDER_ORACLE_SCRIPTS/run-commands-prepare.sh ${PARAMS[@]}
 fi
+
+if [[ "$CREATE_USERS_ENVS" == "true" ]]; then
+  $FOLDER_ORACLE_SCRIPTS/oracle-create-user-envs.sh -v ${PARAMS[@]}
+fi
+
 
 echo "Customizações executadas com sucesso."

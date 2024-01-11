@@ -64,7 +64,7 @@ msgFileBuffer(){
   #lendo o buffer
   while read ${_BUFFER_TIMEOUT[@]} MSG; do
       if [[ ! -z "$MSG" ]]; then
-        echo "$MSG" > $FILE_TMP_BUFFER
+        echo "$MSG" >> $FILE_TMP_BUFFER
       fi
   done
 }
@@ -85,7 +85,6 @@ trapRemoveFileResult(){
   fi  
   return $STATUS
 }
-
 
 
 FILE_EXEC=$(mktemp -t)
