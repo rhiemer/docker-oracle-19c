@@ -147,5 +147,5 @@ dropUser(){
 userExists(){
   P_USER_ORACLE="${1}"
   unset P_USER_CREATE
-  ( echo "SELECT 'UserCreated' as result from all_users where username = '$P_USER_ORACLE'" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $ORACLE_CREDENTIALS | grep UserCreated ) && P_USER_CREATE="true" || true
+  ( echo "SELECT 'UserCreated' as result from all_users where username = '$P_USER_ORACLE' ;" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $ORACLE_CREDENTIALS | grep UserCreated ) && P_USER_CREATE="true" || true
 }
