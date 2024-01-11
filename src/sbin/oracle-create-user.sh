@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]
       shift # past argument
       ;;      
       --table-space-params)
-      ORACLE_DATA_PUMP_RESTORE_TABLESPACE_PARAMS="${2}"
+      RESTORE_TABLESPACE_PARAMS="${2}"
       shift # past argument
       shift # past argument
       ;;
@@ -55,6 +55,16 @@ while [[ $# -gt 0 ]]
       ;; 
       --role-name)
       ROLE_NAME="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --enable-xa)
+      ENABLED_XA_LOCAL="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --all-tablespaces)
+      ALL_TABLES_SPACES="${2}"
       shift # past argument
       shift # past argument
       ;;      
@@ -83,14 +93,30 @@ createAndSetRoleUser(){
 
 setUserXa(){
   ENABLED_XA_KEY="${PREFIX_KEY}_ENABLE_XA"
-  _ENABLED_XA="${!ENABLED_XA_KEY:-$ORACLE_ENABLE_XA_DEFAULT}"
+  _ENABLED_XA="${!ENABLED_XA_KEY:-$ENABLED_XA_LOCAL}"
+  _ENABLED_XA="${_ENABLED_XA:-$ORACLE_ENABLE_XA_USER_DEFAULT}"
   _ENABLED_XA="${_ENABLED_XA:false}"
   if [[ "$_ENABLED_XA" == "true" ]]; then
-    enableUserXAOracle "$_USER_SCHEMA_NAME"
+    echo "Habilitando o usuário $_USER_SCHEMA_NAME para XA."
+    echo ""
+    enableXAOracle "$_USER_SCHEMA_NAME"
+  fi
+}
+
+setUserAllTableSpaces(){
+  ALL_TABLESPACES_KEY="${PREFIX_KEY}_ALL_TABLESPACES"
+  _ALL_TABLESPACES="${!ALL_TABLESPACES_KEY:-$ALL_TABLES_SPACES}"
+  _ALL_TABLESPACES="${_ENABLED_XA:-$ORACLE_ENABLE_XA_USER_DEFAULT}"
+  _ENABLED_XA="${_ENABLED_XA:false}"
+  if [[ "$_ENABLED_XA" == "true" ]]; then
+    echo "Habilitando o usuário $_USER_SCHEMA_NAME para XA."
+    echo ""
+    enableXAOracle "$_USER_SCHEMA_NAME"
   fi
 }
 
 compUsuario(){
+  changePasswordUserOracle "$_USER_SCHEMA_NAME" "$_USER_SCHEMA_NAME_PASSWORD"
   setUserXa
   createAndSetRoleUser
 }
@@ -105,6 +131,9 @@ _USER_SCHEMA_NAME="${!_USER_SCHEMA_NAME_KEY:-$USER_NAME_ENVS}"
 USER_RECREATE_KEY="${PREFIX_KEY}_USER_RECREATE"
 _USER_RECREATE="${!USER_RECREATE_KEY}"
 USER_RECREATE="${_USER_RECREATE:-$USER_RECREATE}"
+
+_USER_SCHEMA_NAME_PASSWORD_KEY="${PREFIX_KEY}_PASSWORD"
+_USER_SCHEMA_NAME_PASSWORD="${!_USER_SCHEMA_NAME_PASSWORD_KEY}"
 
 if [[ "$USER_RECREATE" == "true" ]]; then  
   dropUser "$_USER_SCHEMA_NAME" || echo "Não foi possível dropar o usuário $_USER_SCHEMA_NAME"
@@ -147,8 +176,6 @@ if [[ "$CREATE_TABLE_SPACE" == "true" ]]; then
 
 fi
 
-_USER_SCHEMA_NAME_PASSWORD_KEY="${PREFIX_KEY}_PASSWORD"
-_USER_SCHEMA_NAME_PASSWORD="${!_USER_SCHEMA_NAME_PASSWORD_KEY}"
 
 createUserOracle "$_USER_SCHEMA_NAME" "$TABLESPACE_NAME" "$_USER_SCHEMA_NAME_PASSWORD"
 compUsuario;

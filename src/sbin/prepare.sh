@@ -70,15 +70,16 @@ if [[ "$STARTUP_SYSTEM" == "true" ]]; then
   $FOLDER_ORACLE_SCRIPTS/startup-system-prepare.sh ${PARAMS[@]}
 fi
 
+if [[ "$CREATE_USERS_ENVS" == "true" ]]; then
+  echo "Criando usuários envs..."
+  echo ""
+  $FOLDER_ORACLE_SCRIPTS/oracle-create-user-envs.sh ${PARAMS[@]}
+fi
+
 if [[ "$STARTUP_SQL_INIT" == "true" ]]; then
   $FOLDER_ORACLE_SCRIPTS/run-commands-prepare.sh ${PARAMS[@]}
 fi
 
-if [[ "$CREATE_USERS_ENVS" == "true" ]]; then
-  echo "Cirando usuários envs..."
-  echo ""
-  $FOLDER_ORACLE_SCRIPTS/oracle-create-user-envs.sh ${PARAMS[@]}
-fi
 
 
 echo ""
