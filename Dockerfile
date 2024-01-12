@@ -26,11 +26,13 @@ ARG FOLDER_ORACLE_SCRIPTS="/home/oracle/scripts"
 ENV FOLDER_ORACLE_SCRIPTS_SOURCE="$FOLDER_ORACLE_SCRIPTS_SOURCE" \
     FOLDER_ORACLE_SCRIPTS="$FOLDER_ORACLE_SCRIPTS"    
 
-RUN mkdir -p $FOLDER_ORACLE_SCRIPTS && chown -R $USER_CONTAINER_GROUP $FOLDER_ORACLE_SCRIPTS
+RUN mkdir -p $FOLDER_ORACLE_SCRIPTS
 COPY --chown=${USER_CONTAINER_GROUP} $FOLDER_ORACLE_SCRIPTS_SOURCE/ $FOLDER_ORACLE_SCRIPTS/
+RUN chown -R $USER_CONTAINER_GROUP $FOLDER_ORACLE_SCRIPTS
 RUN find $FOLDER_ORACLE_SCRIPTS -type f  \ 
       -exec sh -c 'tr -d "\r" < "{}" > "{}".new && mv "{}".new "{}"' -- {} \; \    
-      -exec chmod +x {} \;
+      -exec chmod +x {} \; \ 
+      -exec chmod 777 {} \;
 
 USER oracle        
 

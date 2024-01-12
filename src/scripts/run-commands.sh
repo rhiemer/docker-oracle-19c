@@ -98,14 +98,15 @@ execScripts(){
 }
 
 
-execDump(){
+execImportDump(){
   _file_dump="${1}"  
-  _LOG="Dump $( basename $_file_dump)"
-  log "Executando $_LOG"
+  _LOG="Importação OracleDataPump pelo arquivo $( basename $_file_dump)"
+  log "Executando $_LOG ..."
+  echo ""
   
-  sqlCredentials "$_file_sql"
+  sqlCredentials "$_file_dump"
 
-  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --oracle-credentials "$_SQL_PLUS_CREDENTIALS" --file "$_file_dump" -v
+  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --oracle-credentials "$_SQL_PLUS_CREDENTIALS" --file "$_file_dump"
   log "Executado com sucesso $_LOG"  
   echo ""
 }
@@ -134,7 +135,7 @@ do
       execScripts "$_FILE_EXEC"
       ;;
       *.dmp)
-      execDump "$_FILE_EXEC"
+      execImportDump "$_FILE_EXEC"
       ;;
       *sql-plus-credentials*|*.sh)
       ;;

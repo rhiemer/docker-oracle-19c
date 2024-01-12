@@ -225,7 +225,7 @@ roleFactory(){
 
   unset P_ROLE_CREATE
 
-  [[ "$_ROLE_SET_GRANTS_EXISTS" != "true" ]] && roleExists
+  [[ "$_ROLE_SET_GRANTS_EXISTS" != "true" ]] && roleExists "$P_ROLE_NAME_CALC"
   createRoleFactory  "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" || echo "Não foi possível criar a role $P_ROLE_NAME_CALC"
   [[ "$P_ROLE_CREATE" != "true" ]] && grantsRoleFactory "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" "$P_ALL_TABLE_SPACES"
   enableRoleXAOracle "$P_ROLE_NAME_CALC"
