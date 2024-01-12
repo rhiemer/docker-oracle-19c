@@ -77,7 +77,7 @@ if [[ "$CREATE_USERS_ENVS" == "true" ]]; then
 fi
 
 if [[ "$STARTUP_SQL_INIT" == "true" ]]; then
-  $FOLDER_ORACLE_SCRIPTS/run-commands-prepare.sh ${PARAMS[@]}
+  $FOLDER_ORACLE_SCRIPTS/run-commands-prepare.sh -v ${PARAMS[@]}
 fi
 
 

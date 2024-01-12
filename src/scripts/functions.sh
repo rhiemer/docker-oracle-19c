@@ -116,7 +116,7 @@ EOF
 
 enableRoleXAOracle(){  
   P_NAME_ROLE="${1}"
-  P_PREFIX_KEY_ROLE="${ORACLE_ROLES_PREFIX_ENVS}_${P_NAME_ROLE}"  
+  P_PREFIX_KEY_ROLE="${ORACLE_ROLES_PREFIX_ENVS}_${P_NAME_ROLE}_XA"  
   P_XA_ROLE_ENABLED="${!P_PREFIX_KEY_ROLE:-$ORACLE_ENABLE_XA_ROLE_DEFAULT}"
   if [[ "$P_XA_ROLE_ENABLED" == "true" ]]; then
     echo "Habilitando a Role $P_NAME_ROLE para XA."
@@ -148,6 +148,11 @@ createRoleFactory(){
 
 }
 
+roleExists(){
+  P_NAME_ROLE="${1}"
+  unset P_ROLE_CREATE
+  ( echo "SELECT distinct 'RoleCreated' as result from dba_sys_privs where GRANTEE = '$P_NAME_ROLE' ;" | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --connect $ORACLE_CREDENTIALS | grep RoleCreated ) && P_ROLE_CREATE="true" || true
+}
 
 grantsRoleFactory(){
   P_NAME_ROLE="${1}"
@@ -211,11 +216,19 @@ roleFactory(){
       esac  
   fi
 
+  P_PREFIX_KEY_ROLE="${ORACLE_ROLES_PREFIX_ENVS}_${P_ROLE_NAME_CALC}_SET_GRANTS_EXISTS"
+  P_PREFIX_KEY_TYPE_ROLE="${ORACLE_ROLES_PREFIX_TYPES_ENVS}_${P_ROLE_TYPE_CALC}_SET_GRANTS_EXISTS"
 
+  _ROLE_SET_GRANTS_EXISTS="${!P_PREFIX_KEY_TYPE_ROLE}"
+  _ROLE_SET_GRANTS_EXISTS="${!P_PREFIX_KEY_ROLE:-$_ROLE_SET_GRANTS_EXISTS}"
+  _ROLE_SET_GRANTS_EXISTS="${_ROLE_SET_GRANTS_EXISTS:-$ORACLE_ROLE_SET_GRANTS_EXISTS}"
+
+  unset P_ROLE_CREATE
+
+  [[ "$_ROLE_SET_GRANTS_EXISTS" != "true" ]] && roleExists
   createRoleFactory  "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" || echo "Não foi possível criar a role $P_ROLE_NAME_CALC"
-  grantsRoleFactory "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" "$P_ALL_TABLE_SPACES"
-  enableRoleXAOracle "$P_ROLE_NAME_CALC"      
-
+  [[ "$P_ROLE_CREATE" != "true" ]] && grantsRoleFactory "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" "$P_ALL_TABLE_SPACES"
+  enableRoleXAOracle "$P_ROLE_NAME_CALC"
 }
 
 createUserOracle(){
