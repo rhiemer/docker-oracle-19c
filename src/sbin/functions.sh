@@ -162,13 +162,13 @@ grantsRoleFactory(){
 
   case $P_ROLE_TYPE in
       ADMIN)
-      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh -v --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/admin"
+      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/admin"
       ;;
       APP)
-      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh -v --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/app"
+      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/app"
       ;;
       READ-ONLY)
-      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh -v --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/read-only"
+      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/read-only"
       ;;
   esac   
 }
