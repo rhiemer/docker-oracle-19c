@@ -102,7 +102,10 @@ execDump(){
   _file_dump="${1}"  
   _LOG="Dump $( basename $_file_dump)"
   log "Executando $_LOG"
-  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --file "$_file_dump" -v
+  
+  sqlCredentials "$_file_sql"
+
+  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --oracle-credentials "$_SQL_PLUS_CREDENTIALS" --file "$_file_dump" -v
   log "Executado com sucesso $_LOG"  
   echo ""
 }

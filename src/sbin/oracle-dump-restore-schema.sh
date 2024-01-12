@@ -13,6 +13,11 @@ while [[ $# -gt 0 ]]
       VERBOSE="${1}"
       shift # past argument      
       ;;
+      --oracle-credentials)
+      ORACLE_CREDENTIALS="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
       --file)
       FILE_RESTORE="${2}"
       shift # past argument
@@ -152,7 +157,7 @@ createDirectoryLog(){
   FILE_LOG_DATAPUMP_RESTORE="$DIRECTORY_DATAPUMP_RESTORE_LOG:$( basename $FILE_LOG_DATAPUMP_RESTORE)"
 }
 
-
+ORACLE_CREDENTIALS="${ORACLE_CREDENTIALS:-$SQL_PLUS_CREDENCIAIS_ADMIN}"
 
 FILE_BASENAME="$( basename $FILE_RESTORE )"
 FILE_DIR="$( dirname $FILE_RESTORE )"
@@ -210,6 +215,8 @@ if [[ "$_TYPE" == "impdp" ]]; then
   createDirectoryLog
 fi
 
+USER_DATAPUMP_RESTORE_FILE="$(realpath $FILE_RESTORE)"
+
 _RESTORE_GLOBAL_KEY="ORACLE_DATAPUMP_RESTORE_PARAMS_${_TYPE^^}"
 _RESTORE_PARAMS_DEFAULT="${!_RESTORE_GLOBAL_KEY}"
 _RESTORE_PARAMS_DEFAULT="${RESTORE_PARAMS:-$_RESTORE_PARAMS_DEFAULT}"
@@ -218,4 +225,4 @@ _RESTORE_PARAMS_KEY="${PREFIX_KEY}_PARAMS"
 _RESTORE_PARAMS="${!_RESTORE_PARAMS_KEY:-$_RESTORE_PARAMS_DEFAULT}"
 _RESTORE_PARAMS_VALUES=( $( eval echo $_RESTORE_PARAMS ) )
 
-$ORACLE_HOME/bin/$_TYPE "$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA" ${_RESTORE_PARAMS_VALUES[@]} 
+$ORACLE_HOME/bin/$_TYPE "$ORACLE_CREDENTIALS" ${_RESTORE_PARAMS_VALUES[@]} 
