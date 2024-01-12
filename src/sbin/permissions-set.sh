@@ -127,7 +127,7 @@ do
 
       for ACTION in ${_ACTIONS[@]}
       do
-        awk "{print \"$ACTION $_COMP  \" \$0 \" TO $TO ; \"}" $_FILE | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --ignore-erros "true" --connect "$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA"
+        awk "{print \"GRANT $ACTION $_COMP\" \$0 \" TO $TO ; \"}" $_FILE | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --ignore-erros "true" --connect "$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA"
       done 
 
   done 
