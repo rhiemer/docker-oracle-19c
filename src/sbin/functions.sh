@@ -92,7 +92,6 @@ createRoleUserAdmin(){
       create role $P_NAME_ROLE;
       grant connect,resource to $P_NAME_ROLE;
       grant create session,alter session,RESTRICTED SESSION,DEBUG CONNECT SESSION to $P_NAME_ROLE;
-      grant select any dictionary,create session, create any table, create any procedure, create any trigger, create any directory, create any view, create any sequence, create any synonym, create any materialized view to $P_NAME_ROLE;
 EOF
 }
 
@@ -100,6 +99,17 @@ createRoleUserApp(){
   P_NAME_ROLE="${1}"
   P_NAME_ROLE="${P_NAME_ROLE:-$ORACLE_ROLE_USER_APP_NAME}"
   echo "Criando role user app $P_NAME_ROLE"
+  ${COMMAND_SQL[@]} --connect "$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA" << EOF
+      create role $P_NAME_ROLE;
+      GRANT CONNECT TO $P_NAME_ROLE;
+      grant create session,alter session,RESTRICTED SESSION,DEBUG CONNECT SESSION to $P_NAME_ROLE;
+EOF
+}
+
+createRoleReadOnly(){
+  P_NAME_ROLE="${1}"
+  P_NAME_ROLE="${P_NAME_ROLE:-$ORACLE_ROLE_USER_READONLY_NAME}"
+  echo "Criando role readonly $P_NAME_ROLE"
   ${COMMAND_SQL[@]} --connect "$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA" << EOF
       create role $P_NAME_ROLE;
       GRANT CONNECT TO $P_NAME_ROLE;
@@ -118,27 +128,96 @@ enableRoleXAOracle(){
   fi
 }
 
-
 createRoleFactory(){
   P_NAME_ROLE="${1}"
+  P_ROLE_TYPE="${2}"
 
-  P_ROLE_ADD="true"
-  if [ "${P_NAME_ROLE// }" == "$ORACLE_ROLE_USER_DBA_NAME" ]; then  
-    createRoleUserDba "$P_NAME_ROLE" || echo "Não foi possível criar a role $P_NAME_ROLE"
-  elif [ "${P_NAME_ROLE// }" == "$ORACLE_ROLE_USER_ADMIN_NAME" ]; then
-    createRoleUserAdmin "$P_NAME_ROLE" || echo "Não foi possível criar a role $P_NAME_ROLE"
-  elif [ "${P_NAME_ROLE// }" == "$ORACLE_ROLE_USER_APP_NAME" ]; then  
-    createRoleUserApp "$P_NAME_ROLE" || echo "Não foi possível criar a role $P_NAME_ROLE"  
-  elif [ "${P_NAME_ROLE// }" == "$ORACLE_ROLE_USER_SCHEMA_NAME" ]; then  
-    createRoleUserApp "$P_NAME_ROLE" || echo "Não foi possível criar a role $P_NAME_ROLE"  
-  else
-    unset P_ROLE_ADD
-    echo "Role não criada $P_NAME_ROLE"  
-  fi
+
+  case $P_ROLE_TYPE in
+      DBA)
+      createRoleUserDba "$P_NAME_ROLE"
+      ;;
+      ADMIN)
+      createRoleUserAdmin "$P_NAME_ROLE"
+      ;;
+      APP)
+      createRoleUserApp "$P_NAME_ROLE"
+      ;;
+      READ-ONLY)
+      createRoleReadOnly "$P_NAME_ROLE"
+      ;;
+  esac   
   
-  if [[ "$P_ROLE_ADD" == "true" ]]; then
-     enableRoleXAOracle "$P_NAME_ROLE"
+
+}
+
+
+grantsRoleFactory(){
+  P_NAME_ROLE="${1}"
+  P_ROLE_TYPE="${2}"
+  P_ALL_TABLE_SPACES="${3}"  
+
+  P_COMP_COMMAND=()
+  [[ "$P_ALL_TABLE_SPACES" == "true" ]] && P_COMP_COMMAND+=( --actions-comp "ANY" )
+
+  case $P_ROLE_TYPE in
+      ADMIN)
+      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh -v --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/admin"
+      ;;
+      APP)
+      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh -v --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/app"
+      ;;
+      READ-ONLY)
+      $FOLDER_ORACLE_SCRIPTS/permissions-set.sh -v --to "$P_NAME_ROLE" ${P_COMP_COMMAND[@]} --file-permissions "$FOLDER_ORACLE_SCRIPTS/grants/read-only"
+      ;;
+  esac   
+}
+
+
+
+roleFactory(){
+  P_ROLE_NAME_CALC="${1}"
+  P_ROLE_TYPE_CALC="${2}"
+  P_ALL_TABLE_SPACES="${3}"  
+  
+  if [  -z "${P_ROLE_NAME_CALC// }" ]; then  
+      case $P_ROLE_TYPE_CALC in
+          DBA)
+          P_ROLE_NAME_CALC="$ORACLE_ROLE_USER_DBA_NAME"
+          ;;
+          ADMIN)
+          P_ROLE_NAME_CALC="$ORACLE_ROLE_USER_ADMIN_NAME"
+          ;;
+          APP)
+          P_ROLE_NAME_CALC="$ORACLE_ROLE_USER_APP_NAME"
+          ;;
+          READ-ONLY)
+          P_ROLE_NAME_CALC="$ORACLE_ROLE_USER_READONLY_NAME"
+          ;;
+      esac  
   fi
+
+  if [  -z "${P_ROLE_TYPE_CALC// }" ]; then  
+      case $P_ROLE_NAME_CALC in
+          $ORACLE_ROLE_USER_DBA_NAME)
+          P_ROLE_TYPE_CALC="DBA"
+          ;;
+          $ORACLE_ROLE_USER_ADMIN_NAME)
+          P_ROLE_TYPE_CALC="ADMIN"
+          ;;
+          $ORACLE_ROLE_USER_APP_NAME)
+          P_ROLE_TYPE_CALC="APP"
+          ;;
+          $ORACLE_ROLE_USER_READONLY_NAME)
+          P_ROLE_TYPE_CALC="READ-ONLY"
+          ;;
+      esac  
+  fi
+
+
+  createRoleFactory  "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" || echo "Não foi possível criar a role $P_ROLE_NAME_CALC"
+  grantsRoleFactory "$P_ROLE_NAME_CALC" "$P_ROLE_TYPE_CALC" "$P_ALL_TABLE_SPACES"
+  enableRoleXAOracle "$P_ROLE_NAME_CALC"      
 
 }
 

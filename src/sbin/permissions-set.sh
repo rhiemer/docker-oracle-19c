@@ -4,8 +4,6 @@ set -o errexit
 POSITIONAL=()
 FILES_PERMISSIONS=()
 ACTIONS=()
-ACTIONS_COMP=()
-
 
 while [[ $# -gt 0 ]]
  do
@@ -26,13 +24,13 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
-      --actions)
-      ACTIONS+=("${2}")
+      --action)
+      _ACTIONS+=("${2}")
       shift # past argument
       shift # past argument
       ;;
-      --action-comp)
-      ACTIONS_COMP+=("${2}")
+      --actions-comp)
+      ACTIONS_COMP="${2}"
       shift # past argument
       shift # past argument
       ;;
@@ -46,9 +44,93 @@ done
 # restore positional parameters
 set -- "${POSITIONAL[@]}"
 
+source "$FOLDER_ORACLE_SCRIPTS/sqlplus.sh"
+
+_COMP="${ACTIONS_COMP:+ $ACTIONS_COMP }"
 for FILE_PERMISSIONS in ${FILES_PERMISSIONS[@]}
 do
-  for ACTION in ${ACTIONS[@]} 
-    awk "{print \"$ACTION ${ACTIONS_COMP[@]}\" \$0 \" TO $TO\"}" $FILE_PERMISSIONS 
+  
+  _FILES=( $(find $FILE_PERMISSIONS -type f ) )
+
+  for _FILE in ${_FILES[@]}
+  do
+
+      _ACTIONS=()
+      _ACTIONS+=( ${ACTIONS[@]} )
+
+      if [[ -z "${ACTIONS// }" ]]; then
+        case $_FILE in
+            *-create)
+            _ACTIONS+=("CREATE")
+            ;;
+            *-alter)
+            _ACTIONS+=("ALTER")
+            ;;
+            *-drop)
+            _ACTIONS+=("DROP")
+            ;;
+            *-comment)
+            _ACTIONS+=("COMMENT")
+            ;;
+            *-ddl)
+            _ACTIONS+=("CREATE" "ALTER" "DROP")
+            ;;
+            *-select)
+            _ACTIONS+=("SELECT")
+            ;;
+            *-insert)
+            _ACTIONS+=("INSERT")
+            ;;
+            *-update)
+            _ACTIONS+=("UPDATE")
+            ;;
+            *-delete)
+            _ACTIONS+=("DELETE")
+            ;;
+            *-dml)
+            _ACTIONS+=("INSERT" "UPDATE" "DELETE")
+            ;;
+            *-execute)
+            _ACTIONS+=("EXECUTE")
+            ;;
+            *-flashback)
+            _ACTIONS+=("FLASHBACK")
+            ;;
+            *-read)
+            _ACTIONS+=("READ")
+            ;;
+            *-redifine)
+            _ACTIONS+=("REDEFINE")
+            ;;
+            *-under)
+            _ACTIONS+=("UNDER")
+            ;;
+            *-table)
+            _ACTIONS+=("LOCK" "READ" "FLASHBACK" "REDEFINE" "UNDER" "COMMENT")
+            ;;
+            *-force)
+            _ACTIONS+=("FORCE")
+            ;;
+            *-transaction)
+            _ACTIONS+=("FORCE" "SELECT")
+            ;;
+            *-use)
+            _ACTIONS+=("USE")
+            ;;
+            *) 
+            continue;
+            ;;
+        esac   
+      fi
+
+
+
+      for ACTION in ${_ACTIONS[@]}
+      do
+        awk "{print \"$ACTION $_COMP  \" \$0 \" TO $TO ; \"}" $_FILE | $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} -f --ignore-erros "true" --connect "$SQL_PLUS_COMMAND_CREDENCIAIS_SYS_SYSDBA"
+      done 
+
   done 
+
+
 done

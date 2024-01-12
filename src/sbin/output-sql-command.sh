@@ -25,6 +25,16 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
+      --one-command-line)
+      ONE_COMMAND_LINE="${2}"
+      shift # past argument      
+      shift # past argument      
+      ;;
+      --ignore-erros)
+      IGNORE_ERROS="${2}"
+      shift # past argument      
+      shift # past argument      
+      ;;
       --replace-vars)
       REPLACE_VARS_SQL_COMMAND="${2}"
       shift # past argument
@@ -69,11 +79,13 @@ msgFileBuffer(){
   done
 }
 
+
 if [[ ! -z "${FOLLOW// }" ]]; then
   FILE_SQL="$FILE_TMP_BUFFER"
   #esperando o stdout de um pipe após a execução de um comando  ( | ) 
   msgFileBuffer   
 fi
+
 
 
 trapRemoveFileResult(){   
@@ -105,11 +117,12 @@ fi
 
 trap 'trapRemoveFileResult' EXIT
 
+
 sqlplus -s /nolog << EOF
 
       
-      WHENEVER OSERROR EXIT 68;
-      whenever sqlerror exit sql.sqlcode;
+      $( [[ "$IGNORE_ERROS" != "true" ]] && echo "WHENEVER OSERROR EXIT 68;" )
+      $( [[ "$IGNORE_ERROS" != "true" ]] && echo "whenever sqlerror exit sql.sqlcode;" )
       
       set sqlblanklines on;
       set termout on;
@@ -121,3 +134,5 @@ sqlplus -s /nolog << EOF
       exit;
 
 EOF
+
+

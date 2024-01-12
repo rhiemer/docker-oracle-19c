@@ -82,31 +82,35 @@ source "$FOLDER_ORACLE_SCRIPTS/sqlplus.sh"
 source "$FOLDER_ORACLE_SCRIPTS/functions.sh"
 
 createAndSetRoleUser(){
+
+  ALL_TABLESPACES_KEY="${PREFIX_KEY}_ALL_TABLESPACES"
+  _ALL_TABLESPACES="${!ALL_TABLESPACES_KEY:-$ALL_TABLES_SPACES}"
+  _ALL_TABLESPACES="${_ALL_TABLESPACES:-$ORACLE_ENABLE_ALL_TABLESPACES}"
+
+  if [[ "$_ALL_TABLESPACES" == "true" ]]; then
+    setTableSpaceAllUser "$_USER_SCHEMA_NAME"
+  fi
+
   ROLE_NAME_KEY="${PREFIX_KEY}_ROLE_NAME"
   _ROLE_NAME="${!ROLE_NAME_KEY}"
   ROLE_NAME="${_ROLE_NAME:-$ROLE_NAME}"
-  if [  ! -z "${ROLE_NAME// }" ]; then  
-    createRoleFactory "$ROLE_NAME" || echo "Não foi possível criar a role $ROLE_NAME."
-    setRoleUser "$_USER_SCHEMA_NAME" "$ROLE_NAME"
+
+  ROLE_TYPE_KEY="${PREFIX_KEY}_ROLE_TYPE"
+  _ROLE_TYPE="${!ROLE_TYPE_KEY}"
+
+
+  if [[  ! -z "${ROLE_NAME// }" || ! -z "${_ROLE_TYPE// }"  ]]; then  
+    roleFactory "$ROLE_NAME" "$_ROLE_TYPE" "$_ALL_TABLESPACES"
+    setRoleUser "$_USER_SCHEMA_NAME" "$P_ROLE_NAME_CALC"
   fi
+
+
 }
 
 setUserXa(){
   ENABLED_XA_KEY="${PREFIX_KEY}_ENABLE_XA"
   _ENABLED_XA="${!ENABLED_XA_KEY:-$ENABLED_XA_LOCAL}"
   _ENABLED_XA="${_ENABLED_XA:-$ORACLE_ENABLE_XA_USER_DEFAULT}"
-  _ENABLED_XA="${_ENABLED_XA:false}"
-  if [[ "$_ENABLED_XA" == "true" ]]; then
-    echo "Habilitando o usuário $_USER_SCHEMA_NAME para XA."
-    echo ""
-    enableXAOracle "$_USER_SCHEMA_NAME"
-  fi
-}
-
-setUserAllTableSpaces(){
-  ALL_TABLESPACES_KEY="${PREFIX_KEY}_ALL_TABLESPACES"
-  _ALL_TABLESPACES="${!ALL_TABLESPACES_KEY:-$ALL_TABLES_SPACES}"
-  _ALL_TABLESPACES="${_ENABLED_XA:-$ORACLE_ENABLE_XA_USER_DEFAULT}"
   _ENABLED_XA="${_ENABLED_XA:false}"
   if [[ "$_ENABLED_XA" == "true" ]]; then
     echo "Habilitando o usuário $_USER_SCHEMA_NAME para XA."
