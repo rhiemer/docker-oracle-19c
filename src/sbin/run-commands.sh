@@ -99,13 +99,10 @@ execScripts(){
 
 
 execDump(){
-  _file_dump="${1}"
-  
-  sqlCredentials "$_file_dump"
-
+  _file_dump="${1}"  
   _LOG="Dump $( basename $_file_dump)"
   log "Executando $_LOG"
-  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --oracle-credentials "$_SQL_PLUS_CREDENTIALS" --file "$_file_dump" --create-directory-imp "true" --create-schema-file "true" -v
+  $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema.sh ${VERBOSE} --file "$_file_dump" -v
   log "Executado com sucesso $_LOG"  
   echo ""
 }
@@ -125,6 +122,8 @@ do
   fi
 
   case $_FILE_EXEC in
+      *.conf.sql)
+      ;;
       *.sql)
       execSql "$_FILE_EXEC"
       ;;

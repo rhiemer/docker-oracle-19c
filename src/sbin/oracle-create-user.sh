@@ -58,6 +58,11 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
+      --role-type)
+      ROLE_TYPE="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
       --enable-xa)
       ENABLED_XA_LOCAL="${2}"
       shift # past argument
@@ -96,9 +101,8 @@ createAndSetRoleUser(){
   ROLE_NAME="${_ROLE_NAME:-$ROLE_NAME}"
 
   ROLE_TYPE_KEY="${PREFIX_KEY}_ROLE_TYPE"
-  _ROLE_TYPE="${!ROLE_TYPE_KEY}"
-
-
+  _ROLE_TYPE="${!ROLE_TYPE_KEY:-$ROLE_TYPE}"
+  
   if [[  ! -z "${ROLE_NAME// }" || ! -z "${_ROLE_TYPE// }"  ]]; then  
     roleFactory "$ROLE_NAME" "$_ROLE_TYPE" "$_ALL_TABLESPACES"
     setRoleUser "$_USER_SCHEMA_NAME" "$P_ROLE_NAME_CALC"
