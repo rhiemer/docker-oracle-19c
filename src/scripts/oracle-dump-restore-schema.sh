@@ -237,7 +237,7 @@ if [[ "$_POS_RESTORE_EXEC" == "true" ]]; then
     KEY_POS_RESTORE_EXEC_USER="${PREFIX_KEY_POS_RESTORE_USER}_${_USER_CREATE}"  
     _POS_RESTORE_EXEC_USER="${!KEY_POS_RESTORE_EXEC_USER:-true}"
     if [[ "$_POS_RESTORE_EXEC_USER" == "true" ]]; then      
-      $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema-pos.sh -v ${VERBOSE} --oracle-credentials "$ORACLE_CREDENTIALS" --path "$FILE_DIR" --current-schema "$_USER_CREATE"
+      $FOLDER_ORACLE_SCRIPTS/oracle-dump-restore-schema-pos.sh ${VERBOSE} --oracle-credentials "$ORACLE_CREDENTIALS" --path "$FILE_DIR" --current-schema "$_USER_CREATE"
     fi  
   done
 fi
