@@ -50,6 +50,21 @@ while [[ $# -gt 0 ]]
       shift # past argument
       shift # past argument
       ;;
+      --auto-commit)
+      AUTO_COMMIT="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --roll-back)
+      ROLL_BACK_ERROR_EXIT="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
+      --current-schema)
+      CURRENT_SCHEMA="${2}"
+      shift # past argument
+      shift # past argument
+      ;;
       *)    # unknown option
       POSITIONAL+=("$1") # save it in an array for later
       shift # past argument
@@ -62,9 +77,13 @@ set -- "${POSITIONAL[@]}"
 
 REPLACE_VARS_SQL_COMMAND="${REPLACE_VARS_SQL_COMMAND:-true}"
 BUFFER_TIMEOUT="${BUFFER_TIMEOUT:-1}"  
+
 if [[ ! -z "${BUFFER_TIMEOUT// }" ]]; then
   _BUFFER_TIMEOUT=("-t" "$BUFFER_TIMEOUT")
 fi
+
+ROLL_BACK_ERROR_EXIT="${ROLL_BACK_ERROR_EXIT:-true}"
+AUTO_COMMIT="${AUTO_COMMIT:-false}"
 
 FILE_TMP_BUFFER="$( mktemp )"
 
@@ -117,18 +136,21 @@ fi
 
 trap 'trapRemoveFileResult' EXIT
 
-
 sqlplus -s /nolog << EOF
 
       
       $( [[ "$IGNORE_ERROS" != "true" ]] && echo "WHENEVER OSERROR EXIT 68;" )
-      $( [[ "$IGNORE_ERROS" != "true" ]] && echo "whenever sqlerror exit sql.sqlcode;" )
-      
+      $( [[ "$IGNORE_ERROS" != "true" ]] && echo "whenever sqlerror exit sql.sqlcode `[[ "$ROLL_BACK_ERROR_EXIT" == "true" ]] && echo "ROLLBACK"`;" )
+
       set sqlblanklines on;
       set termout on;
       
       CONNECT $ORACLE_CONNECT;
-      
+    
+      $( [[ "$AUTO_COMMIT" == "true" ]] && echo "SET AUTOCOMMIT ON;" )
+      $( [[ "$AUTO_COMMIT" != "true" ]] && echo "SET AUTOCOMMIT OFF;" )
+      $( [[ ! -z "${CURRENT_SCHEMA// }" ]] && echo "alter session set current_schema = $CURRENT_SCHEMA ;" )
+
       @$FILE_EXEC2;
       
       exit;

@@ -126,6 +126,8 @@ do
   fi
 
   case $_FILE_EXEC in
+      *${ORACLE_DATAPUMP_RESTORE_POS_PATH_NAME}*)
+      ;;
       *.conf.sql)
       ;;
       *.sql)
