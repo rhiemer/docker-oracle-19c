@@ -40,6 +40,7 @@ set -- "${POSITIONAL[@]}"
 source "$FOLDER_ORACLE_SCRIPTS/sqlplus.sh"
 
 SQL_PLUS_CREDENTIALS_FILE="${SQL_PLUS_CREDENTIALS:-sql-plus-credentials}"
+SQL_PARAMS_EXEC="${SQL_PARAMS_EXEC:-sql-params-exec}"
 FORCE_RUN_SQL_SYNC="${FORCE_RUN_SQL_SYNC:-false}"
 
 
@@ -60,15 +61,26 @@ sqlCredentials(){
   _USER_EXEC="$( echo $_SQL_PLUS_CREDENTIALS |  awk -F '/' '{print $1}' )"
 }
 
+paramsExecSql(){
+  _file_sql="${1}"
+  _SQL_FILE_PARAMS_EXEC="$(dirname $_file_sql)/$SQL_PARAMS_EXEC"
+  if [ -f "$_SQL_FILE_PARAMS_EXEC" ] ; then     
+    _EXEC_SQL_PARAMS="$(cat $_SQL_FILE_PARAMS_EXEC)"
+  else
+    _EXEC_SQL_PARAMS="$(echo  $ORACLE_INIT_SQL_PARAMS)"
+  fi 
+}
+
 execSql(){
 
   _file_sql="${1}"
 
   sqlCredentials "$_file_sql"
+  paramsExecSql  "$_file_sql"
 
   _LOG="SQL - $( basename $_file_sql) Usuario:$_USER_EXEC"
   log "Executando $_LOG"
-  $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --connect "$_SQL_PLUS_CREDENTIALS" --file-sql "$_file_sql"
+  eval $FOLDER_ORACLE_SCRIPTS/output-sql-command.sh ${VERBOSE} --connect "$_SQL_PLUS_CREDENTIALS" --file-sql "$_file_sql" $( echo $_EXEC_SQL_PARAMS )
   log "Executado com sucesso $_LOG"
   echo ""
 
@@ -124,8 +136,13 @@ do
   if [ -d "${_FILE_EXEC}" ]; then
     continue;
   fi
+  
 
   case $_FILE_EXEC in
+      *${SQL_PARAMS_EXEC}*)
+      ;;
+      *${SQL_PLUS_CREDENTIALS_FILE}*)
+      ;;
       *${ORACLE_DATAPUMP_RESTORE_POS_PATH_NAME}*)
       ;;
       *.conf.sql)
@@ -133,13 +150,11 @@ do
       *.sql)
       execSql "$_FILE_EXEC"
       ;;
-      *.exec.sh)
+      *.sh)
       execScripts "$_FILE_EXEC"
       ;;
       *.dmp)
       execImportDump "$_FILE_EXEC"
-      ;;
-      *sql-plus-credentials*|*.sh)
       ;;
       *)
       execScriptsFolder "$_FILE_EXEC"
